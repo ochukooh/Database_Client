@@ -168,3 +168,23 @@ connection.commit()
 # Populate Employees table
 cursor.execute(insert_employees)
 connection.commit()
+
+
+#Obj1 Establishing connection
+from mysql.connector.pooling import MySQLConnectionPool
+from mysql.connector import Error
+dbconfig={"database":"little_lemon_db", "user":"your_username", "password":"your_password"}
+try:
+    pool = MySQLConnectionPool(pool_name = "pool_a",
+                           pool_size = 2, #default is 5
+                           **dbconfig)
+    print("The connection pool is created with a name: ",pool.pool_name)
+    print("The pool size is:",pool.pool_size)
+
+except Error as er:
+    print("Error code:", er.errno)
+    print("Error message:", er.msg)
+print("Getting a connection from the pool.")
+connection1 = pool.get_connection()
+print("Creating a cursor object.")
+cursor = connection1.cursor()
