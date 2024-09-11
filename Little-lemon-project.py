@@ -188,3 +188,72 @@ print("Getting a connection from the pool.")
 connection1 = pool.get_connection()
 print("Creating a cursor object.")
 cursor = connection1.cursor()
+
+#objective 2 using stored procedure
+stored_procedure_query="""
+CREATE PROCEDURE PeakHours()
+
+BEGIN
+
+SELECT Hour(BookingSlot), Count(Hour(BookingSlot)) 
+FROM Bookings
+Groub by Hour(BookingSlot)
+ORDER BY Count(Hour(BookingSlot)) DESC LIMIT 1;
+
+END
+
+"""
+# Execute the query
+cursor.execute(stored_procedure_query)
+# Call the stored procedure with its name
+cursor.callproc("PeakHours")
+results = next(cursor.stored_results() )
+dataset = results.fetchall()
+for column_id in cursor.stored_results():
+    columns = [ column[0] for column in column_id.description ]
+
+# Print column names
+print(columns)
+
+# Print data 
+for data in dataset:
+    print(data)
+
+
+
+#Obj3
+stored_procedure_query="""
+CREATE PROCEDURE GuestStatus()
+
+BEGIN
+
+SELECT  
+CONCAT(
+Bookings.GuestFirstname,
+' ',
+bookings.GuestLastname
+) AS CustomerName,
+CASE
+WHEN Role IN ("Manager") or ("Assistant Manager") THEN "Ready to pay" 
+WHEN Role IN ("Head Chef") THEN "Ready to serve" 
+WHEN Role IN ("Assistant Chef") THEN "Preparing Order"
+WHEN Role IN ("Head Waiter") THEN "Order served"
+ELSE "In Queue" 
+END AS Status
+FROM employees LEFT JOIN Bookings ON employees.EmployeeID = Bookings.EmployeeID;
+
+END
+
+"""
+cursor.execute(stored_procedure_query)
+results = next( cursor.stored_results() )
+dataset = results.fetchall()
+for column_id in cursor.stored_results():
+    columns = [ column[0] for column in column_id.description ]
+
+# Print column names
+print(columns)
+
+# Print data 
+for data in dataset:
+    print(data)
